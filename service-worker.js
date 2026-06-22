@@ -1,8 +1,13 @@
 // carm task — minimal service worker (enables PWA install + light offline cache)
-const CACHE = 'carm-cache-v1';
+const CACHE = 'carm-cache-v3';
 
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
+self.addEventListener('activate', (e) => e.waitUntil((async () => {
+  // purge any older caches so stale versions don't get served
+  const keys = await caches.keys();
+  await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
+  await self.clients.claim();
+})()));
 
 // Network-first so the app always stays fresh; fall back to cache when offline.
 self.addEventListener('fetch', (e) => {
