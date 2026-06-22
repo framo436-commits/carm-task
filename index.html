@@ -1868,6 +1868,9 @@
   }
   .menu-btn:hover { background: var(--glass-bg-hover); }
   .sidebar-backdrop { display: none; }
+  /* monochrome inline icons (consistent across devices, inherit text color) */
+  .ic { width: 1.05em; height: 1.05em; display: inline-block; vertical-align: -0.16em; flex-shrink: 0; }
+
   /* liquid-glass bottom navigation (mobile only) */
   .mobile-nav { display: none; }
 
@@ -1957,14 +1960,14 @@
     </div>
 
     <div class="sidebar-item active" onclick="navMyTasks()" id="nav-my-tasks">
-      <span class="sidebar-item-icon">◎</span> <span data-i18n="nav.myTasks">My Tasks</span>
+      <span class="sidebar-item-icon" data-ic="mytasks"></span> <span data-i18n="nav.myTasks">My Tasks</span>
       <span class="sidebar-badge" id="my-tasks-badge">0</span>
     </div>
     <div class="sidebar-item" onclick="navReports()" id="nav-reports">
-      <span class="sidebar-item-icon">📊</span> <span data-i18n="nav.reports">Reports</span>
+      <span class="sidebar-item-icon" data-ic="chart"></span> <span data-i18n="nav.reports">Reports</span>
     </div>
     <div class="sidebar-item" onclick="navTrash()" id="nav-trash">
-      <span class="sidebar-item-icon">🗑</span> <span data-i18n="nav.trash">Trash</span>
+      <span class="sidebar-item-icon" data-ic="trash"></span> <span data-i18n="nav.trash">Trash</span>
       <span class="sidebar-badge" id="trash-badge" style="background:var(--priority-urgent);display:none">0</span>
     </div>
 
@@ -1976,8 +1979,8 @@
     <button class="add-project-btn" id="add-dept-btn" onclick="openDeptModal()" style="display:none" data-i18n="side.addDept">
       + Add Department
     </button>
-    <button class="add-project-btn" id="people-btn" onclick="navPeople()" style="display:none" data-i18n="side.people">
-      👥 People
+    <button class="add-project-btn" id="people-btn" onclick="navPeople()" style="display:none">
+      <span class="sidebar-item-icon" data-ic="people"></span> <span data-i18n="side.people">People</span>
     </button>
 
     <div class="sidebar-spacer"></div>
@@ -2015,14 +2018,14 @@
   <!-- Mobile liquid-glass bottom navigation -->
   <nav class="mobile-nav" id="mobile-nav">
     <button class="mnav-item" id="mnav-tasks" onclick="navMyTasks()">
-      <span class="mnav-ic">◎</span><span data-i18n="mnav.tasks">Задачи</span>
+      <span class="mnav-ic" data-ic="mytasks"></span><span data-i18n="mnav.tasks">Задачи</span>
     </button>
     <button class="mnav-item" id="mnav-reports" onclick="navReports()">
-      <span class="mnav-ic">📊</span><span data-i18n="mnav.reports">Отчёты</span>
+      <span class="mnav-ic" data-ic="chart"></span><span data-i18n="mnav.reports">Отчёты</span>
     </button>
-    <button class="mnav-add" id="mnav-add" onclick="openTaskModal()" aria-label="Add task">＋</button>
+    <button class="mnav-add" id="mnav-add" onclick="openTaskModal()" aria-label="Add task">+</button>
     <button class="mnav-item" id="mnav-menu" onclick="toggleNav()">
-      <span class="mnav-ic">☰</span><span data-i18n="mnav.menu">Меню</span>
+      <span class="mnav-ic" data-ic="menu"></span><span data-i18n="mnav.menu">Меню</span>
     </button>
   </nav>
 
@@ -2053,7 +2056,7 @@
           ⧉ Filter
         </button>
         <button class="topbar-btn topbar-btn-ghost notif-btn" id="notif-btn" onclick="openNotifications(event)" title="Notifications">
-          🔔<span class="notif-badge" id="notif-badge" style="display:none">0</span>
+          <span data-ic="bell" style="display:inline-flex"></span><span class="notif-badge" id="notif-badge" style="display:none">0</span>
         </button>
         <button class="topbar-btn topbar-btn-primary" id="add-task-btn" onclick="openTaskModal()" data-i18n="top.addTask">
           + Add Task
@@ -2429,7 +2432,7 @@ const tr = {
   'nav.trash':       { ru: 'Корзина',      en: 'Trash' },
   'side.departments':{ ru: 'Департаменты', en: 'Departments' },
   'side.addDept':    { ru: '+ Департамент',en: '+ Add Department' },
-  'side.people':     { ru: '👥 Пользователи', en: '👥 People' },
+  'side.people':     { ru: 'Пользователи', en: 'People' },
   'legend.overdue':  { ru: 'Просрочено',   en: 'Overdue' },
   'legend.urgent':   { ru: 'Срочно',       en: 'Urgent' },
   'legend.attention':{ ru: 'Требует внимания', en: 'Attention' },
@@ -2518,6 +2521,25 @@ function setLang(l) {
   render();
 }
 function toggleLang() { setLang(LANG === 'ru' ? 'en' : 'ru'); }
+
+// ─── Monochrome inline icons (replace inconsistent colour emoji) ─────
+const _svg = (inner) => `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+const ICONS = {
+  mytasks: _svg('<circle cx="12" cy="12" r="9"/><path d="M8.3 12.4l2.6 2.6 4.8-5.4"/>'),
+  chart:   _svg('<line x1="6" y1="20" x2="6" y2="13"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="9"/>'),
+  trash:   _svg('<path d="M4 7h16"/><path d="M9 7V5h6v2"/><path d="M6.5 7l1 13h9l1-13"/>'),
+  people:  _svg('<circle cx="9" cy="8" r="3"/><path d="M3.5 19.5a5.5 5.5 0 0 1 11 0"/><path d="M16 5.3a3 3 0 0 1 0 5.4"/><path d="M16.6 14.3a5.5 5.5 0 0 1 4 5.2"/>'),
+  layers:  _svg('<path d="M12 3l8 4-8 4-8-4 8-4z"/><path d="M4 12l8 4 8-4"/><path d="M4 16.5l8 4 8-4"/>'),
+  clock:   _svg('<circle cx="12" cy="13" r="8"/><path d="M12 9.5V13l2.6 1.8"/><path d="M9 2.5h6"/>'),
+  gantt:   _svg('<line x1="3" y1="6" x2="13" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="5" y1="18" x2="14" y2="18"/>'),
+  bell:    _svg('<path d="M6 9a6 6 0 0 1 12 0c0 4.5 1.5 5.6 2 6.2H4c.5-.6 2-1.7 2-6.2z"/><path d="M10 20a2 2 0 0 0 4 0"/>'),
+  inbox:   _svg('<path d="M4 13l2.6-7h10.8L20 13"/><path d="M4 13v5h16v-5"/><path d="M4 13h4l1.5 2.5h5L16 13h4"/>'),
+  gear:    _svg('<circle cx="12" cy="12" r="3"/><path d="M12 2.6v2.8M12 18.6v2.8M21.4 12h-2.8M5.4 12H2.6M18.2 5.8l-2 2M7.8 16.2l-2 2M18.2 18.2l-2-2M7.8 7.8l-2-2"/>'),
+  menu:    _svg('<line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>'),
+};
+function applyIcons() {
+  document.querySelectorAll('[data-ic]').forEach(el => { const n = el.getAttribute('data-ic'); if (ICONS[n]) el.innerHTML = ICONS[n]; });
+}
 
 // Protected "incoming" column shown only on a department's General Board
 const COMMON_COLUMN = { id: 'common', label: 'Общие', color: '#8b7cff', protected: true };
@@ -2890,6 +2912,7 @@ function getVisibleTasks() {
 // ─── Render ────────────────────────────────────────────────
 function render() {
   applyI18n();
+  applyIcons();
   renderSidebar();
   renderContent();
   renderDetail();
@@ -3101,7 +3124,7 @@ function renderTrash(container) {
 
   container.innerHTML = `
     <div class="trash-head">
-      <div class="trash-head-icon">🗑</div>
+      <div class="trash-head-icon">${ICONS.trash}</div>
       <div>
         <div class="trash-head-title">${tx('Корзина', 'Trash')}</div>
         <div class="trash-head-sub">${tx(`${items.length} удалённых задач · хранятся здесь, не удаляются навсегда`, `${items.length} deleted task${items.length === 1 ? '' : 's'} · kept here, never permanently removed`)}</div>
@@ -3109,7 +3132,7 @@ function renderTrash(container) {
     </div>
     ${items.length
       ? `<div class="trash-list">${rows}</div>`
-      : `<div class="empty-state"><div class="empty-state-icon">🗑</div><div class="empty-state-text">${tx('Корзина пуста', 'Trash is empty')}</div></div>`}`;
+      : `<div class="empty-state"><div class="empty-state-icon" style="opacity:0.5">${ICONS.trash}</div><div class="empty-state-text">${tx('Корзина пуста', 'Trash is empty')}</div></div>`}`;
 }
 
 function renderDeptBanner(dept, project) {
@@ -3158,7 +3181,7 @@ function renderDeptBanner(dept, project) {
         <div class="dept-banner-sub">${subText}</div>
       </div>
       <div class="dept-banner-members">${avatars}${more}</div>
-      ${isAdmin() ? `<button class="manage-btn" onclick="openDeptSettings('${dept.id}')">${tx('⚙ Управление', '⚙ Manage')}</button>` : ''}
+      ${isAdmin() ? `<button class="manage-btn" onclick="openDeptSettings('${dept.id}')">${ICONS.gear} ${tx('Управление', 'Manage')}</button>` : ''}
     </div>`;
 }
 
@@ -3179,7 +3202,7 @@ function renderBoard(container, tasks, canAdd) {
 
     const owner = (!personal && colDef.ownerId) ? userById(colDef.ownerId) : null;
     const lockNote = protectedCol
-      ? (personal ? ' <span class="col-lock" title="Все назначенные вам задачи">📥</span>' : ' <span class="col-lock" title="Incoming — tasks here alert the department head">🔔</span>')
+      ? (personal ? ` <span class="col-lock" title="Все назначенные вам задачи">${ICONS.inbox}</span>` : ` <span class="col-lock" title="Incoming — tasks here alert the department head">${ICONS.bell}</span>`)
       : '';
     const titleHtml = editing
       ? `<input class="column-title-input" id="col-rename-input" value="${escHtml(colDef.label)}"
@@ -3760,11 +3783,11 @@ function renderReports(container) {
     </div>
     ${filterBar}
     <div class="report-tabs">
-      ${tb('projects', tx('📊 Проекты', '📊 Projects'))}
-      ${tb('people', tx('👥 По сотрудникам', '👥 By employee'))}
-      ${tb('tasks', tx('🧩 По задачам', '🧩 By task'))}
-      ${tb('duration', tx('⏱ Сроки', '⏱ Timeline'))}
-      ${tb('gantt', tx('📅 Диаграмма Ганта', '📅 Gantt'))}
+      ${tb('projects', ICONS.chart + ' ' + tx('Проекты', 'Projects'))}
+      ${tb('people', ICONS.people + ' ' + tx('По сотрудникам', 'By employee'))}
+      ${tb('tasks', ICONS.layers + ' ' + tx('По задачам', 'By task'))}
+      ${tb('duration', ICONS.clock + ' ' + tx('Сроки', 'Timeline'))}
+      ${tb('gantt', ICONS.gantt + ' ' + tx('Диаграмма Ганта', 'Gantt'))}
     </div>
     <div class="report-board">${body}</div>`;
 }
