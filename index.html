@@ -1814,6 +1814,82 @@
       transition-duration: 0.01ms !important;
     }
   }
+
+  /* ─── Auth screen (passwordless OTP) ─────────────────── */
+  .auth-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+    background: linear-gradient(135deg, #e8eefc 0%, #eef0fb 45%, #f3eefb 100%);
+  }
+  .auth-card {
+    width: 100%; max-width: 380px;
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: blur(40px) saturate(190%); -webkit-backdrop-filter: blur(40px) saturate(190%);
+    border: 1px solid var(--glass-border-bright); border-radius: 22px;
+    padding: 30px 26px; box-shadow: 0 24px 60px -16px rgba(40,52,90,0.35);
+  }
+  .auth-logo { display: flex; align-items: center; gap: 9px; font-size: 20px; font-weight: 600; margin-bottom: 22px; color: var(--text-primary); }
+  .auth-logo-mark { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #5b6ef5, #8b7cff); }
+  .auth-title { font-size: 19px; font-weight: 600; color: var(--text-primary); }
+  .auth-sub { font-size: 13px; color: var(--text-secondary); margin: 6px 0 18px; line-height: 1.5; }
+  .auth-input {
+    width: 100%; padding: 13px 14px; border-radius: 12px;
+    border: 1px solid var(--glass-border); background: rgba(255,255,255,0.7);
+    font-family: inherit; font-size: 15px; color: var(--text-primary); outline: none; transition: border-color 150ms;
+  }
+  .auth-input:focus { border-color: var(--accent); }
+  .auth-code { letter-spacing: 8px; text-align: center; font-size: 22px; }
+  .auth-btn {
+    width: 100%; margin-top: 14px; padding: 13px; border: none; border-radius: 12px;
+    font-family: inherit; font-size: 15px; font-weight: 600; color: #fff;
+    background: var(--accent); cursor: pointer; box-shadow: 0 8px 22px rgba(91,110,245,0.4);
+    transition: filter 150ms, transform 100ms;
+  }
+  .auth-btn:hover { filter: brightness(1.06); }
+  .auth-btn:active { transform: scale(0.99); }
+  .auth-btn:disabled { opacity: 0.6; cursor: default; }
+  .auth-err { color: var(--priority-urgent); font-size: 12.5px; margin-top: 8px; min-height: 15px; }
+  .auth-links { display: flex; justify-content: space-between; margin-top: 16px; font-size: 12.5px; color: var(--text-secondary); }
+  .auth-links span { cursor: pointer; } .auth-links span:hover { color: var(--accent); }
+
+  /* ─── Mobile menu button + backdrop ──────────────────── */
+  .menu-btn {
+    display: none; align-items: center; justify-content: center;
+    width: 36px; height: 36px; flex-shrink: 0; border: none; border-radius: 9px;
+    background: var(--glass-bg); color: var(--text-primary); font-size: 18px; cursor: pointer;
+  }
+  .menu-btn:hover { background: var(--glass-bg-hover); }
+  .sidebar-backdrop { display: none; }
+
+  /* ─── Phone layout ───────────────────────────────────── */
+  @media (max-width: 820px) {
+    .app { height: 100dvh; }
+    .menu-btn { display: inline-flex; }
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 200;
+      width: min(84vw, 300px); transform: translateX(-100%);
+      transition: transform 240ms var(--ease-out); box-shadow: 0 0 50px rgba(20,28,46,0.25);
+    }
+    body.nav-open .sidebar { transform: translateX(0); }
+    .sidebar-backdrop {
+      display: block; position: fixed; inset: 0; z-index: 150;
+      background: rgba(20,28,46,0.38); opacity: 0; pointer-events: none; transition: opacity 200ms;
+    }
+    body.nav-open .sidebar-backdrop { opacity: 1; pointer-events: auto; }
+    .topbar { padding: 0 12px; gap: 8px; }
+    .topbar-sep { display: none; }
+    .topbar-title { font-size: 15px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .view-toggle { display: none; }
+    .search-box { display: none; }
+    .topbar-right { gap: 6px; margin-left: auto; }
+    .topbar-btn { padding: 6px 10px; font-size: 12px; }
+    .content { padding: 14px 12px !important; }
+    .board-column { width: 80vw; max-width: 300px; }
+    .modal { width: 94vw; }
+    .detail-modal { width: 96vw; max-height: 90vh; }
+    .report-filter-bar { flex-wrap: wrap; }
+    .auth-card { padding: 26px 20px; }
+  }
 </style>
 </head>
 <body>
@@ -1891,12 +1967,14 @@
       <span class="user-switch-icon">⇅</span>
     </div>
   </aside>
+  <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleNav()"></div>
 
   <!-- Main -->
   <div class="main">
 
     <!-- Topbar -->
     <div class="topbar">
+      <button class="menu-btn" onclick="toggleNav()" aria-label="Menu">☰</button>
       <div class="topbar-title" id="topbar-title">My Tasks</div>
       <div class="topbar-sep"></div>
 
@@ -2195,6 +2273,44 @@
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeColumnModal()" data-i18n="common.cancel">Cancel</button>
       <button class="modal-submit" onclick="createColumn()" data-i18n="cm.add">Add Column</button>
+    </div>
+  </div>
+</div>
+
+<!-- Auth screen (passwordless email one-time code) -->
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-logo"><span class="auth-logo-mark">✦</span> carm task</div>
+
+    <div id="auth-step-email">
+      <div class="auth-title">Вход / Регистрация</div>
+      <div class="auth-sub">Введите рабочий email — пришлём одноразовый код. Пароль не нужен.</div>
+      <input type="email" id="auth-email" class="auth-input" placeholder="you@company.com" autocomplete="email"
+             onkeydown="if(event.key==='Enter')authSendCode()">
+      <div class="auth-err" id="auth-err-email"></div>
+      <button class="auth-btn" id="auth-send-btn" onclick="authSendCode()">Получить код</button>
+    </div>
+
+    <div id="auth-step-code" style="display:none">
+      <div class="auth-title">Введите код</div>
+      <div class="auth-sub">Код отправлен на <b id="auth-email-echo"></b>. Проверьте почту, в т.ч. «Спам».</div>
+      <input type="text" inputmode="numeric" id="auth-code" class="auth-input auth-code" placeholder="——————" maxlength="8"
+             autocomplete="one-time-code" onkeydown="if(event.key==='Enter')authVerify()">
+      <div class="auth-err" id="auth-err-code"></div>
+      <button class="auth-btn" id="auth-verify-btn" onclick="authVerify()">Войти</button>
+      <div class="auth-links">
+        <span onclick="authBackToEmail()">← Изменить email</span>
+        <span onclick="authSendCode()">Отправить снова</span>
+      </div>
+    </div>
+
+    <div id="auth-step-name" style="display:none">
+      <div class="auth-title">Как вас зовут?</div>
+      <div class="auth-sub">Первый вход — создадим ваш профиль.</div>
+      <input type="text" id="auth-name" class="auth-input" placeholder="Имя и фамилия"
+             onkeydown="if(event.key==='Enter')authFinishRegister()">
+      <div class="auth-err" id="auth-err-name"></div>
+      <button class="auth-btn" onclick="authFinishRegister()">Продолжить</button>
     </div>
   </div>
 </div>
@@ -5255,8 +5371,12 @@ function openUserSwitcher(event) {
       </div>
     </div>`;
   }).join('');
+  const logoutRow = supa ? `<div class="dropdown-item" style="border-top:1px solid var(--glass-border);color:var(--priority-urgent)" onclick="authLogout()">
+      <div class="mini-avatar" style="background:transparent;color:var(--priority-urgent);box-shadow:inset 0 0 0 1.5px var(--priority-urgent)">⎋</div>
+      <span style="font-size:12.5px">${tx('Выйти', 'Log out')}</span>
+    </div>` : '';
   const dd = document.getElementById('dropdown');
-  dd.innerHTML = items;
+  dd.innerHTML = items + logoutRow;
   dd.style.minWidth = '230px';
   const rect = event.currentTarget.getBoundingClientRect();
   dd.style.top = (rect.top - 8) + 'px';
@@ -5457,6 +5577,10 @@ document.getElementById('invite-modal').addEventListener('click', e => {
 document.getElementById('detail-panel').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeDetail();
 });
+// Close the mobile nav drawer after tapping a navigation entry
+document.getElementById('sidebar').addEventListener('click', e => {
+  if (e.target.closest('.sidebar-item, .sub-item')) document.body.classList.remove('nav-open');
+});
 document.getElementById('subtask-modal').addEventListener('click', e => {
   if (e.target === e.currentTarget) backToTask();
 });
@@ -5638,9 +5762,11 @@ function applyRemote(d) {
   cloudApplying = false;
 }
 async function initCloud() {
-  if (!cloudConfigured()) return;            // empty config → pure local mode
+  if (!cloudConfigured()) { hideAuth(); return; }   // empty config → pure local mode, no login gate
   try {
-    supa = window.supabase.createClient(CLOUD.url, CLOUD.key);
+    supa = window.supabase.createClient(CLOUD.url, CLOUD.key, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
+    });
     cloudId = localStorage.getItem('carm-client-id');
     if (!cloudId) { cloudId = 'c' + Date.now() + '-' + Math.floor(Math.random() * 1e6); localStorage.setItem('carm-client-id', cloudId); }
     const { data, error } = await supa.from('app_state').select('data,client').eq('id', 'main').maybeSingle();
@@ -5655,9 +5781,99 @@ async function initCloud() {
         toast(tx('☁ Данные обновлены', '☁ Data updated by a teammate'));
       })
       .subscribe();
-    toast(tx('☁ Общая синхронизация включена', '☁ Shared sync enabled'));
+    // Auth gate: react to login / logout (fires immediately with the persisted session)
+    supa.auth.onAuthStateChange((_event, session) => { handleSession(session); });
   } catch (e) { console.warn('cloud init failed', e); }
 }
+
+// ─── Authentication (passwordless email OTP) ────────────────
+const ADMIN_EMAILS = ['admin@esentai.com'];   // these emails get admin on first login
+const AUTH_PALETTE = [['#5b6ef5','#c7c0ff'],['#38bdf8','#a8e6ff'],['#10b981','#bbf7d0'],['#f43f5e','#ffc0cb'],['#c342ff','#e9c7ff'],['#f97316','#ffd9b0'],['#f59e0b','#ffe9b8']];
+let authPendingEmail = '';
+
+function showAuth() { document.getElementById('auth-overlay').style.display = 'flex'; }
+function hideAuth() { document.getElementById('auth-overlay').style.display = 'none'; }
+function authShowStep(s) { ['email','code','name'].forEach(k => document.getElementById('auth-step-' + k).style.display = (k === s ? 'block' : 'none')); }
+function authBackToEmail() { document.getElementById('auth-err-code').textContent = ''; authShowStep('email'); }
+
+async function authSendCode() {
+  const email = (document.getElementById('auth-email').value || '').trim().toLowerCase();
+  const err = document.getElementById('auth-err-email');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { err.textContent = 'Введите корректный email'; return; }
+  err.textContent = '';
+  const btn = document.getElementById('auth-send-btn'); btn.disabled = true; btn.textContent = 'Отправляем…';
+  try {
+    const { error } = await supa.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+    if (error) { err.textContent = error.message; }
+    else { authPendingEmail = email; document.getElementById('auth-email-echo').textContent = email; document.getElementById('auth-code').value = ''; authShowStep('code'); setTimeout(() => document.getElementById('auth-code').focus(), 60); }
+  } catch (e) { err.textContent = String(e); }
+  btn.disabled = false; btn.textContent = 'Получить код';
+}
+
+async function authVerify() {
+  const code = (document.getElementById('auth-code').value || '').trim();
+  const err = document.getElementById('auth-err-code');
+  if (code.length < 4) { err.textContent = 'Введите код из письма'; return; }
+  err.textContent = '';
+  const btn = document.getElementById('auth-verify-btn'); btn.disabled = true; btn.textContent = 'Проверяем…';
+  try {
+    const { error } = await supa.auth.verifyOtp({ email: authPendingEmail, token: code, type: 'email' });
+    if (error) err.textContent = 'Неверный или просроченный код';
+    // success → onAuthStateChange → handleSession
+  } catch (e) { err.textContent = String(e); }
+  btn.disabled = false; btn.textContent = 'Войти';
+}
+
+function initialsFrom(name) { const p = name.trim().split(/\s+/); return (((p[0] || '')[0] || '') + ((p[1] || '')[0] || (p[0] || '')[1] || '')).toUpperCase() || 'U'; }
+function createUserFromAuth(email, name, role) {
+  let base = initialsFrom(name), ini = base, n = 1;
+  while (state.users.some(u => u.initials === ini)) { ini = base[0] + (n++); }
+  const dept = state.departments[0];
+  const u = {
+    id: 'u-' + Date.now().toString(36), name, initials: ini, role,
+    deptId: dept ? dept.id : null, colors: AUTH_PALETTE[state.users.length % AUTH_PALETTE.length],
+    email, phone: '', status: 'active', access: role === 'admin' ? [] : (dept ? [dept.id] : []),
+  };
+  state.users.push(u);
+  ASSIGNEE_COLORS[ini] = u.colors;
+  persist();   // syncs the new account to the cloud
+  return u;
+}
+function authFinishRegister() {
+  const name = (document.getElementById('auth-name').value || '').trim();
+  const err = document.getElementById('auth-err-name');
+  if (name.length < 2) { err.textContent = 'Введите имя'; return; }
+  const u = createUserFromAuth(authPendingEmail, name, ADMIN_EMAILS.includes(authPendingEmail) ? 'admin' : 'member');
+  enterAppAs(u);
+}
+function enterAppAs(u) {
+  state.currentUserId = u.id;
+  state.expandedDepts = new Set([u.deptId].filter(Boolean));
+  state.nav = { type: 'my-tasks' };
+  state.selectedTask = null;
+  hideAuth();
+  render();
+}
+function handleSession(session) {
+  if (!session || !session.user) { showAuth(); authShowStep('email'); return; }
+  const email = (session.user.email || '').toLowerCase();
+  authPendingEmail = email;
+  const u = state.users.find(x => (x.email || '').toLowerCase() === email);
+  if (u) { enterAppAs(u); return; }
+  // unknown email → registration: ask for a name
+  const guess = email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  document.getElementById('auth-name').value = guess;
+  showAuth(); authShowStep('name');
+}
+async function authLogout() {
+  closeDropdown();
+  try { if (supa) await supa.auth.signOut(); } catch (e) {}
+  document.getElementById('auth-email').value = '';
+  showAuth(); authShowStep('email');
+}
+
+// ─── Mobile navigation drawer ───────────────────────────────
+function toggleNav() { document.body.classList.toggle('nav-open'); }
 
 // ─── Init ──────────────────────────────────────────────────
 document.head.insertAdjacentHTML('beforeend', '<style>' + GANTT_CSS + '</style>');
