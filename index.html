@@ -2012,7 +2012,7 @@
       </div>
     </div>
 
-    <button class="lang-toggle" id="lang-toggle" onclick="toggleLang()" data-i18n="lang.toggle">🌐 English</button>
+    <button class="lang-toggle" id="lang-toggle" onclick="toggleLang()"><span data-ic="globe" style="display:inline-flex;vertical-align:-0.16em"></span> <span data-i18n="lang.toggle">English</span></button>
 
     <div class="user-switcher" id="user-switcher" onclick="openUserSwitcher(event)">
       <div class="user-avatar" id="us-avatar">AM</div>
@@ -2515,7 +2515,7 @@ const tr = {
   'fd.inprogress':   { ru: '◐ В работе',   en: '◐ In Progress' },
   'fd.review':       { ru: '◑ Проверка',   en: '◑ Review' },
   'fd.done':         { ru: '● Готово',     en: '● Done' },
-  'lang.toggle':     { ru: '🌐 English',   en: '🌐 Русский' },
+  'lang.toggle':     { ru: 'English',      en: 'Русский' },
   'mnav.tasks':      { ru: 'Задачи',       en: 'Tasks' },
   'mnav.reports':    { ru: 'Отчёты',       en: 'Reports' },
   'mnav.menu':       { ru: 'Меню',         en: 'Menu' },
@@ -2550,6 +2550,9 @@ const ICONS = {
   inbox:   _svg('<path d="M4 13l2.6-7h10.8L20 13"/><path d="M4 13v5h16v-5"/><path d="M4 13h4l1.5 2.5h5L16 13h4"/>'),
   gear:    _svg('<circle cx="12" cy="12" r="3"/><path d="M12 2.6v2.8M12 18.6v2.8M21.4 12h-2.8M5.4 12H2.6M18.2 5.8l-2 2M7.8 16.2l-2 2M18.2 18.2l-2-2M7.8 7.8l-2-2"/>'),
   menu:    _svg('<line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>'),
+  globe:   _svg('<circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/>'),
+  download: _svg('<path d="M12 4v11"/><path d="M8 11l4 4 4-4"/><path d="M5 19.5h14"/>'),
+  printer: _svg('<path d="M7 8.5V3.5h10v5"/><rect x="4" y="8.5" width="16" height="8" rx="1.6"/><path d="M7.5 14h9v6.5h-9z"/>'),
 };
 function applyIcons() {
   document.querySelectorAll('[data-ic]').forEach(el => { const n = el.getAttribute('data-ic'); if (ICONS[n]) el.innerHTML = ICONS[n]; });
@@ -3784,8 +3787,8 @@ function renderReports(container) {
     ? `<div class="trash-head-sub" style="margin-top:4px;color:var(--accent)">${tx('Период', 'Period')}: ${state.reportFrom || '…'} → ${state.reportTo || '…'} (${tx('по сроку', 'by due date')})</div>` : '';
 
   const downloadBar = (tab === 'gantt') ? `
-    <button class="topbar-btn topbar-btn-primary" onclick="downloadReport()">${tx('⬇ Скачать', '⬇ Download')}</button>
-    <button class="topbar-btn topbar-btn-ghost" onclick="printReport()">${tx('🖨 Печать / PDF', '🖨 Print / PDF')}</button>` : '';
+    <button class="topbar-btn topbar-btn-primary" onclick="downloadReport()">${ICONS.download} ${tx('Скачать', 'Download')}</button>
+    <button class="topbar-btn topbar-btn-ghost" onclick="printReport()">${ICONS.printer} ${tx('Печать / PDF', 'Print / PDF')}</button>` : '';
 
   container.innerHTML = `
     <div class="people-screen-head">
