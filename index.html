@@ -5916,7 +5916,7 @@ async function initCloud() {
 }
 
 // ─── Authentication (passwordless email OTP) ────────────────
-const ADMIN_EMAILS = ['admin@esentai.com'];   // these emails get admin on first login
+const ADMIN_EMAILS = ['admin@esentai.com', 'r.beloussov@esentaitower.com'];   // these emails are always admin
 const AUTH_PALETTE = [['#5b6ef5','#c7c0ff'],['#38bdf8','#a8e6ff'],['#10b981','#bbf7d0'],['#f43f5e','#ffc0cb'],['#c342ff','#e9c7ff'],['#f97316','#ffd9b0'],['#f59e0b','#ffe9b8']];
 let authPendingEmail = '';
 
@@ -5988,7 +5988,12 @@ function handleSession(session) {
   const email = (session.user.email || '').toLowerCase();
   authPendingEmail = email;
   const u = state.users.find(x => (x.email || '').toLowerCase() === email);
-  if (u) { enterAppAs(u); return; }
+  if (u) {
+    // keep designated admin emails as admin even if the stored role drifted
+    if (ADMIN_EMAILS.includes(email) && u.role !== 'admin') { u.role = 'admin'; u.access = []; persist(); }
+    enterAppAs(u);
+    return;
+  }
   // unknown email → registration: ask for a name
   const guess = email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   document.getElementById('auth-name').value = guess;
